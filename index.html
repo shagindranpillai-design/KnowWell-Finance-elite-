@@ -1,534 +1,1600 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Know Well | Elite Master Terminal</title>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+  <title>Know Well | Premium Research Terminal</title>
 
-    <!-- TradingView widget script -->
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <script src="https://s3.tradingview.com/tv.js"></script>
 
-    <style>
-        :root {
-            --gold: #fbbf24;
-            --bg: #020617;
-            --card: #0f172a;
-            --border: #1e293b;
-            --text-dim: #94a3b8;
-        }
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-2: #07101d;
+      --card: rgba(15, 23, 42, 0.9);
+      --card-2: rgba(9, 14, 25, 0.92);
+      --border: rgba(148, 163, 184, 0.14);
+      --gold: #fbbf24;
+      --gold-2: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --blue: #60a5fa;
+      --green: #10b981;
+      --red: #f87171;
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+      --radius: 20px;
+    }
 
-        body {
-            background: var(--bg);
-            color: #f8fafc;
-            font-family: 'Inter', system-ui, sans-serif;
-            margin: 0;
-            padding-bottom: 70px;
-            overflow-x: hidden;
-            box-sizing: border-box;
-        }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    html {
+      scroll-behavior: smooth;
+    }
 
-        /* GATEKEEPER */
-        #gatekeeper {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 20px;
-        }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.08), transparent 22%),
+        radial-gradient(circle at top left, rgba(96, 165, 250, 0.06), transparent 18%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      overflow-x: hidden;
+      padding-bottom: 90px;
+    }
 
-        #gatekeeper .title {
-            font-size: 30px;
-            font-weight: 900;
-            letter-spacing: -1px;
-        }
+    body.reader-open {
+      overflow: hidden;
+    }
 
-        #gatekeeper .title span {
-            color: var(--gold);
-        }
+    img {
+      max-width: 100%;
+      display: block;
+    }
 
-        #gatekeeper .subtitle {
-            font-size: 10px;
-            color: var(--text-dim);
-            margin-top: 5px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+    button, input {
+      font: inherit;
+    }
 
-        .gate-btn {
-            background: var(--gold);
-            border: none;
-            padding: 18px 50px;
-            border-radius: 8px;
-            font-weight: 900;
-            cursor: pointer;
-            margin-top: 30px;
-        }
+    .container {
+      width: min(1240px, 100%);
+      margin: 0 auto;
+      padding: 0 16px;
+    }
 
-        /* HEADER */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: #000;
-            border-bottom: 2px solid var(--gold);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+    .hidden {
+      display: none !important;
+    }
 
-        .logo {
-            font-weight: 900;
-            font-size: 16px;
-            letter-spacing: 1px;
-        }
+    /* Gate */
+    .gatekeeper {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at center, rgba(251, 191, 36, 0.09), transparent 25%),
+        #000;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
 
-        .logo span {
-            color: var(--gold);
-        }
+    .gatekeeper.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
 
-        /* BREAKING BAR / TICKER */
-        .breaking-bar {
-            background: var(--gold);
-            color: #000;
-            font-size: 10px;
-            font-weight: 900;
-            padding: 6px 0;
-            overflow: hidden;
-            white-space: nowrap;
-        }
+    .gate-panel {
+      width: min(460px, 100%);
+      border-radius: 28px;
+      border: 1px solid rgba(251, 191, 36, 0.18);
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 34px 24px;
+      text-align: center;
+    }
 
-        .ticker-move {
-            display: inline-block;
-            animation: tick 35s linear infinite;
-        }
+    .gate-title {
+      margin: 0;
+      font-size: clamp(32px, 8vw, 48px);
+      font-weight: 900;
+      letter-spacing: -1.4px;
+    }
 
-        @keyframes tick {
-            from { transform: translateX(100%); }
-            to   { transform: translateX(-100%); }
-        }
+    .gate-title span {
+      color: var(--gold);
+    }
 
-        /* MINI WIDGET ROW */
-        .mini-widget-row {
-            display: flex;
-            gap: 12px;
-            margin: 0 20px 20px;
-            flex-wrap: wrap;
-        }
+    .gate-sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
 
-        .mini-widget {
-            flex: 1;
-            min-width: 180px;
-            max-width: 400px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 10px;
-            overflow: hidden;
-        }
+    .gate-btn {
+      margin-top: 28px;
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 16px 18px;
+      cursor: pointer;
+      font-weight: 900;
+      color: #111827;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.25);
+    }
 
-        .mini-widget h4 {
-            margin: 0 0 10px 0;
-            font-size: 12px;
-            color: var(--gold);
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
+    /* Header */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 1500;
+      background: rgba(2, 6, 23, 0.82);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(251, 191, 36, 0.18);
+    }
 
-        /* NUCLEUS & RESEARCH */
-        .nucleus-container {
-            padding: 30px 20px;
-            background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
-        }
+    .topbar-inner {
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
 
-        .section-tag {
-            color: var(--gold);
-            font-size: 10px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
 
-        .premium-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
+    .brand-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
 
-        .news-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+    .brand-title span {
+      color: var(--gold);
+    }
 
-        .news-card {
-            background: var(--card);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            display: flex;
-            height: 110px;
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
-        }
+    .brand-sub {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
 
-        .news-card:active,
-        .news-card:focus {
-            transform: scale(0.98);
-            background: #1e293b;
-        }
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid rgba(251, 191, 36, 0.18);
+      background: rgba(251, 191, 36, 0.08);
+      color: var(--gold);
+      white-space: nowrap;
+    }
 
-        .news-img {
-            width: 110px;
-            height: 110px;
-            object-fit: cover;
-        }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.8);
+    }
 
-        .news-info {
-            padding: 12px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+    /* Breaking ticker */
+    .ticker {
+      overflow: hidden;
+      white-space: nowrap;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      color: #111827;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
 
-        .news-info h3 {
-            font-size: 14px;
-            margin: 0;
-            color: #fff;
-            line-height: 1.3;
-        }
+    .ticker-track {
+      display: inline-block;
+      padding: 9px 0 9px 100%;
+      animation: tickerMove 32s linear infinite;
+      font-weight: 900;
+      font-size: 11px;
+      letter-spacing: 0.3px;
+    }
 
-        .news-tag {
-            font-size: 9px;
-            color: var(--gold);
-            font-weight: 900;
-        }
+    @keyframes tickerMove {
+      from { transform: translateX(0); }
+      to { transform: translateX(-100%); }
+    }
 
-        /* READER POPUP */
-        #reader {
-            position: fixed;
-            inset: 0;
-            background: var(--bg);
-            z-index: 5000;
-            display: none;
-            padding: 40px 25px;
-            overflow-y: auto;
-        }
+    main {
+      padding: 18px 0 8px;
+    }
 
-        .close-reader {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            color: var(--gold);
-            font-weight: 900;
-            font-size: 12px;
-            border: 1px solid var(--gold);
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    .section {
+      margin-bottom: 22px;
+    }
 
-        .reader-header {
-            color: var(--gold);
-            font-size: 10px;
-            font-weight: 900;
-            margin-bottom: 15px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+    .section-label {
+      margin: 0 0 12px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 11px;
+      font-weight: 900;
+    }
 
-        .reader-title {
-            font-size: 26px;
-            line-height: 1.2;
-            margin-bottom: 25px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
-        }
+    .glass {
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
 
-        .reader-body {
-            color: var(--text-dim);
-            line-height: 1.8;
-            font-size: 16px;
-        }
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 16px;
+    }
 
-        /* CHAT */
-        .chat-stream {
-            height: 120px;
-            background: rgba(0, 0, 0, 0.3);
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-            overflow-y: auto;
-            padding: 15px;
-            font-size: 11px;
-            color: var(--text-dim);
-            line-height: 1.6;
-        }
+    .hero-main {
+      overflow: hidden;
+      position: relative;
+      min-height: 320px;
+    }
 
-        .msg {
-            margin-bottom: 8px;
-        }
+    .hero-image {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to top, rgba(2, 6, 23, 0.96) 0%, rgba(2, 6, 23, 0.3) 55%, rgba(2, 6, 23, 0.15) 100%);
+      z-index: 1;
+    }
 
-        .msg b {
-            color: var(--gold);
-        }
+    .hero-image img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      filter: saturate(1.05) contrast(1.02);
+    }
 
-        /* FOOTER CHAT */
-        .footer-chat {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 60px;
-            background: #000;
-            border-top: 1px solid var(--gold);
-            display: flex;
-            z-index: 1001;
-        }
+    .hero-fallback {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.28), transparent 24%),
+        linear-gradient(135deg, #0f172a, #09111d 55%, #1e293b);
+      z-index: -1;
+    }
 
-        .footer-chat input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #fff;
-            padding: 0 20px;
-            font-size: 14px;
-            outline: none;
-        }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 320px;
+      padding: 24px;
+      gap: 10px;
+    }
 
-        .footer-chat button {
-            background: var(--gold);
-            border: none;
-            padding: 0 35px;
-            font-weight: 900;
-            cursor: pointer;
-        }
-    </style>
+    .hero-badge {
+      display: inline-flex;
+      width: fit-content;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: clamp(24px, 4.5vw, 40px);
+      line-height: 1.1;
+      letter-spacing: -0.8px;
+    }
+
+    .hero-desc {
+      margin: 0;
+      color: #d7e2f0;
+      line-height: 1.7;
+      font-size: 15px;
+      max-width: 90%;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color: #111827;
+    }
+
+    .btn-dark {
+      background: rgba(15, 23, 42, 0.86);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .hero-side {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .signal-card {
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+    }
+
+    .signal-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .signal-top h4 {
+      margin: 0;
+      font-size: 13px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    .signal-value {
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .signal-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    /* Widgets */
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .widget-card {
+      overflow: hidden;
+    }
+
+    .widget-head {
+      padding: 14px 14px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .widget-head h3 {
+      margin: 0;
+      color: var(--gold);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .widget-head span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .widget-body {
+      padding: 8px;
+    }
+
+    .tv-shell {
+      height: 180px;
+      width: 100%;
+    }
+
+    /* News controls */
+    .news-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .news-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .news-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .refresh-note {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* News cards */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .news-card {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 0;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease;
+      text-align: left;
+    }
+
+    .news-card:hover,
+    .news-card:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(251, 191, 36, 0.28);
+      outline: none;
+    }
+
+    .news-thumb {
+      position: relative;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.24), transparent 24%),
+        linear-gradient(135deg, #172033, #0b1324);
+      overflow: hidden;
+    }
+
+    .news-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .news-thumb-badge {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      background: rgba(2, 6, 23, 0.82);
+      color: var(--gold);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+    }
+
+    .news-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .news-topline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .source-chip {
+      color: var(--gold);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .news-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    .news-summary,
+    .news-why {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 13px;
+    }
+
+    .news-why strong {
+      color: #dbe6f4;
+    }
+
+    .news-link {
+      margin-top: auto;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    /* Chat */
+    .chat-panel {
+      overflow: hidden;
+    }
+
+    .chat-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .chat-head h3 {
+      margin: 0;
+      font-size: 14px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .chat-stream {
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 16px 18px;
+      background: rgba(0, 0, 0, 0.14);
+    }
+
+    .msg {
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .msg:last-child {
+      margin-bottom: 0;
+    }
+
+    .msg-label {
+      font-weight: 900;
+      margin-right: 6px;
+    }
+
+    .msg.system .msg-label { color: var(--gold); }
+    .msg.user .msg-label { color: var(--blue); }
+    .msg.alert .msg-label { color: var(--red); }
+    .msg.success .msg-label { color: var(--green); }
+
+    /* Bottom chat */
+    .footer-chat {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1600;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(251, 191, 36, 0.16);
+    }
+
+    .footer-chat-inner {
+      width: min(1240px, 100%);
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      padding: 12px 16px;
+    }
+
+    .footer-chat input {
+      flex: 1;
+      min-width: 0;
+      background: rgba(15, 23, 42, 0.95);
+      color: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      outline: none;
+    }
+
+    .footer-chat input:focus {
+      border-color: rgba(251, 191, 36, 0.28);
+    }
+
+    .footer-chat button {
+      border: none;
+      border-radius: 14px;
+      padding: 0 22px;
+      font-weight: 900;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color: #111827;
+    }
+
+    /* Reader modal */
+    .reader {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      background: rgba(2, 6, 23, 0.96);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-y: auto;
+      padding: 24px 16px 120px;
+    }
+
+    .reader[hidden] {
+      display: none;
+    }
+
+    .reader-card {
+      width: min(920px, 100%);
+      overflow: hidden;
+    }
+
+    .reader-cover {
+      position: relative;
+      height: 280px;
+      background:
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.2), transparent 24%),
+        linear-gradient(135deg, #172033, #0b1324 60%, #1e293b);
+    }
+
+    .reader-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .reader-body {
+      padding: 20px;
+    }
+
+    .reader-close {
+      position: sticky;
+      top: 14px;
+      z-index: 4;
+      margin: 14px 14px 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      border-radius: 12px;
+      padding: 9px 12px;
+      background: rgba(2, 6, 23, 0.78);
+      color: var(--gold);
+      font-weight: 900;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+
+    .reader-topline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .reader-title {
+      margin: 14px 0 12px;
+      font-size: clamp(26px, 5vw, 40px);
+      line-height: 1.14;
+      letter-spacing: -0.8px;
+    }
+
+    .reader-text,
+    .reader-explainer {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.85;
+      margin: 0 0 16px;
+    }
+
+    .reader-explainer strong {
+      color: #e5edf7;
+    }
+
+    .reader-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .reader-actions a {
+      text-decoration: none;
+    }
+
+    /* Loader / empty */
+    .state-box {
+      padding: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .widget-grid,
+      .news-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .news-card {
+        grid-template-columns: 1fr;
+      }
+
+      .news-thumb {
+        height: 220px;
+      }
+
+      .topbar-inner {
+        min-height: 62px;
+      }
+
+      .status-pill {
+        display: none;
+      }
+
+      .hero-content {
+        min-height: 290px;
+      }
+
+      .hero-desc {
+        max-width: 100%;
+      }
+
+      .reader-cover {
+        height: 220px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<div id="gatekeeper">
-    <div class="title">KNOW <span>WELL</span></div>
-    <div class="subtitle">Research Terminal V2.0</div>
-    <button class="gate-btn" onclick="initializeTerminal()">INITIALIZE TERMINAL</button>
-</div>
-
-<div id="reader">
-    <button class="close-reader" onclick="closeNews()">EXIT RESEARCH [X]</button>
-    <div id="reader-content"></div>
-</div>
-
-<nav>
-    <div class="logo">KNOW WELL | <span>ELITE</span></div>
-</nav>
-
-<div class="breaking-bar">
-    <div class="ticker-move">
-        MARKET STATUS: ACTIVE | VOLATILITY INDEX: HIGH | ASSET CORRELATION: XAU/XAG TIGHTENING | LIQUIDITY: STABLE | GLOBAL MACRO NODES: ALERT...
+  <div id="gatekeeper" class="gatekeeper" aria-modal="true" role="dialog">
+    <div class="gate-panel">
+      <h1 class="gate-title">KNOW <span>WELL</span></h1>
+      <div class="gate-sub">Premium Research Terminal</div>
+      <button id="initBtn" class="gate-btn" type="button">INITIALIZE TERMINAL</button>
     </div>
-</div>
+  </div>
 
-<!-- MINI WIDGET CHARTS ROW -->
-<div class="mini-widget-row">
-    <div class="mini-widget">
-        <h4>Gold (XAUUSD)</h4>
-        <div class="tradingview-widget-container" style="height:140px;">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                    "symbol": "OANDA:XAUUSD",
-                    "width": "100%",
-                    "height": "100%",
-                    "locale": "en",
-                    "dateRange": "1M",
-                    "colorTheme": "dark",
-                    "trendLineColor": "rgba(230, 145, 56, 1)",
-                    "isTransparent": false,
-                    "autosize": false,
-                    "noTimeScale": true
-                }
-            </script>
-        </div>
+  <div id="reader" class="reader" hidden>
+    <div class="reader-card glass">
+      <button id="closeReaderBtn" class="reader-close" type="button">EXIT RESEARCH [X]</button>
+      <div id="readerContent"></div>
     </div>
+  </div>
 
-    <div class="mini-widget">
-        <h4>Silver (XAGUSD)</h4>
-        <div class="tradingview-widget-container" style="height:140px;">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                    "symbol": "OANDA:XAGUSD",
-                    "width": "100%",
-                    "height": "100%",
-                    "locale": "en",
-                    "dateRange": "1M",
-                    "colorTheme": "dark",
-                    "trendLineColor": "rgba(230, 145, 56, 1)",
-                    "isTransparent": false,
-                    "autosize": false,
-                    "noTimeScale": true
-                }
-            </script>
-        </div>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <h2 class="brand-title">KNOW WELL | <span>ELITE</span></h2>
+        <div class="brand-sub">macro • metals • crypto • market intelligence</div>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        LIVE DAILY NEWS SYNC
+      </div>
     </div>
+  </header>
 
-    <div class="mini-widget">
-        <h4>Bitcoin (BTC)</h4>
-        <div class="tradingview-widget-container" style="height:140px;">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                {
-                    "symbol": "BITSTAMP:BTCUSD",
-                    "width": "100%",
-                    "height": "100%",
-                    "locale": "en",
-                    "dateRange": "1M",
-                    "colorTheme": "dark",
-                    "trendLineColor": "rgba(230, 145, 56, 1)",
-                    "isTransparent": false,
-                    "autosize": false,
-                    "noTimeScale": true
-                }
-            </script>
+  <div class="ticker">
+    <div id="tickerTrack" class="ticker-track"></div>
+  </div>
+
+  <main class="container">
+    <section class="section">
+      <p class="section-label">Top Story</p>
+      <div class="hero">
+        <article id="featuredStory" class="hero-main glass">
+          <div class="hero-image">
+            <div class="hero-fallback"></div>
+          </div>
+          <div class="hero-content">
+            <span class="hero-badge">Initializing latest intelligence…</span>
+            <h1 class="hero-title">Loading fresh market headlines</h1>
+            <p class="hero-desc">
+              Pulling the latest finance, metals, macro, and crypto stories into your terminal.
+            </p>
+            <div class="hero-meta">
+              <span>Source: Live feeds</span>
+              <span>Updated daily</span>
+            </div>
+          </div>
+        </article>
+
+        <aside class="hero-side glass">
+          <div class="signal-card">
+            <div class="signal-top">
+              <h4>Daily refresh</h4>
+              <div class="signal-value" id="dailyStatus">Ready</div>
+            </div>
+            <p>
+              News is cached for the current day and automatically refreshes when the date changes.
+            </p>
+          </div>
+
+          <div class="signal-card">
+            <div class="signal-top">
+              <h4>Last update</h4>
+              <div class="signal-value" id="lastUpdatedText">—</div>
+            </div>
+            <p>
+              A manual refresh button is included in case you want the latest feed immediately.
+            </p>
+          </div>
+
+          <div class="signal-card">
+            <div class="signal-top">
+              <h4>Story explainer</h4>
+              <div class="signal-value">Enabled</div>
+            </div>
+            <p>
+              Each article includes a short summary plus a plain-English “why it matters” note.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="section-label">Live Watchlist</p>
+      <div id="widgetGrid" class="widget-grid"></div>
+    </section>
+
+    <section class="section">
+      <p class="section-label">Latest News Feed</p>
+
+      <div class="news-controls">
+        <div class="news-meta">
+          <div><strong id="newsCount">0</strong> stories loaded</div>
+          <div id="feedStatus">Waiting for first refresh…</div>
         </div>
+
+        <div class="news-actions">
+          <button id="refreshNewsBtn" class="btn btn-gold" type="button">REFRESH NOW</button>
+          <div class="refresh-note">Auto-refreshes daily</div>
+        </div>
+      </div>
+
+      <div id="newsGrid" class="news-grid"></div>
+    </section>
+
+    <section class="section">
+      <p class="section-label">Terminal Stream</p>
+      <div class="chat-panel glass">
+        <div class="chat-head">
+          <h3>Research chatter</h3>
+          <div style="color: var(--muted); font-size: 12px;">Live local terminal log</div>
+        </div>
+        <div id="chatLogs" class="chat-stream"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer-chat">
+    <div class="footer-chat-inner">
+      <input id="chatInput" type="text" placeholder="Broadcast intelligence..." autocomplete="off" />
+      <button id="sendBtn" type="button">SEND</button>
     </div>
-</div>
+  </div>
 
-<div class="content">
-    <div class="nucleus-container">
-        <div class="section-tag">Market Nucleus</div>
-        <div class="premium-card">
-            <h2>The Convergence Intelligence</h2>
-            <p>Institutional capital is rotating into "Hard Assets." Monitor the divergence between spot price and derivatives liquidity. Current technicals suggest a 4‑year cycle peak in progress.</p>
-        </div>
+  <script>
+    const CONFIG = {
+      rssBridge: "https://api.rss2json.com/v1/api.json?rss_url=",
+      feeds: [
+        "https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=(gold%20OR%20silver%20OR%20bitcoin%20OR%20btc%20OR%20crypto%20OR%20inflation%20OR%20fed%20OR%20rates%20OR%20stocks%20OR%20markets%20OR%20commodities)%20when%3A7d&hl=en-US&gl=US&ceid=US:en"
+      ],
+      cacheKey: "kw_live_news_cache_v3",
+      cacheDayKey: "kw_live_news_cache_day_v3",
+      cacheTimeKey: "kw_live_news_cache_time_v3",
+      maxStories: 10,
+      checkIntervalMs: 60 * 60 * 1000
+    };
 
-    <div class="section-tag">Breaking News Feed</div>
-<div class="news-grid">
-
-    <!-- Article 1: Gold Breakout -->
-    <div class="news-card"
-         onclick="openNews('METALS', 'Gold Enters $4,700+ Territory', 'In 2026, gold prices have stabilized above $4,675, with analysts pointing to strong central-bank demand and safe-haven flows amid global macro uncertainty. Technical structure shows a bullish channel between $4,500 and $5,100, with the current retest of the mid-range suggesting further upside potential.')">
-        <div style="width:110px;height:110px;background:linear-gradient(45deg,#fbbf24,#f59e0b);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:12px;">GOLD<br>$4,700+</div>
-        <div class="news-info">
-            <span class="news-tag">SECTOR: METALS</span>
-            <h3>Gold Enters $4,700+ Territory</h3>
-        </div>
-    </div>
-
-    <!-- Article 2: Silver Momentum -->
-    <div class="news-card"
-         onclick="openNews('METALS', 'Silver Rallies on Tight Supply', 'Silver is in a multi-year bull market, closing 2025 near $74.56 with 120% gains driven by tight physical supply and rising industrial demand from solar and EV applications. Inventories on major exchanges have hit decade-low levels.')">
-        <div style="width:110px;height:110px;background:linear-gradient(45deg,#c0c0c0,#a8a8a8);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:12px;">SILVER<br>$74+</div>
-        <div class="news-info">
-            <span class="news-tag">SECTOR: METALS</span>
-            <h3>Silver Rallies on Tight Supply</h3>
-        </div>
-    </div>
-
-    <!-- Article 3: BTC ETF -->
-    <div class="news-card"
-         onclick="openNews('CRYPTO', 'Bitcoin ETFs Eat Miner Supply', 'Bitcoin ETFs now absorb roughly 12x more capital per day than miner output, making institutions the marginal price driver rather than miners. Daily inflows routinely exceed $500 million.')">
-        <div style="width:110px;height:110px;background:linear-gradient(45deg,#f7931a,#ffcc00);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:12px;">BTC<br>ETFs</div>
-        <div class="news-info">
-            <span class="news-tag">SECTOR: CRYPTO</span>
-            <h3>Bitcoin ETFs Eat Miner Supply</h3>
-        </div>
-    </div>
-
-    <!-- Article 4: G7 Debt -->
-    <div class="news-card"
-         onclick="openNews('MACRO', 'G7 Debt and Devaluation Bets', 'Debt-to-GDP ratios in the G7 have crossed 120% in several major economies, raising the risk of either default or currency devaluation. Markets increasingly price in the latter.')">
-        <div style="width:110px;height:110px;background:linear-gradient(45deg,#334155,#475569);display:flex;align-items:center;justify-content:center;color:#fbbf24;font-weight:900;font-size:12px;">G7<br>DEBT</div>
-        <div class="news-info">
-            <span class="news-tag">SECTOR: MACRO</span>
-            <h3>G7 Debt and Devaluation Bets</h3>
-        </div>
-    </div>
-
-    <!-- Article 5: Gold/Silver Ratio -->
-    <div class="news-card"
-         onclick="openNews('METALS', 'Gold/Silver Ratio Tightens Below 80', 'The XAU/XAG ratio has declined inside a rising channel and now sits near 78, indicating that silver is catching up to gold. Historically, ratios below 80 suggest relative strength in silver.')">
-        <div style="width:110px;height:110px;background:linear-gradient(45deg,#fbbf24,#c0c0c0);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:12px;">XAU/XAG<br>78</div>
-        <div class="news-info">
-            <span class="news-tag">SECTOR: METALS</span>
-            <h3>Gold/Silver Ratio Tightens Below 80</h3>
-        </div>
-    </div>
-</div>
-
-<div class="chat-stream" id="chat-logs">
-    <div class="msg"><b>[SYSTEM]</b> Terminal authorized. All intelligence nodes online.</div>
-    <div class="msg"><b>[INTEL]</b> Order flow detected at 2350.00 resistance.</div>
-    <div class="msg"><b>[MACRO]</b> Fed minutes suggest "higher for longer" sentiment.</div>
-    <div class="msg"><b>[LIQUIDITY]</b> Unusual volume spike in Silver futures (XAG).</div>
-    <div class="msg"><b>[ALERT]</b> Cross‑asset correlation index is spiking.</div>
-    <div class="msg"><b>[SYSTEM]</b> Syncing with Global Nodes... 100% complete.</div>
-</div>
-
-<div class="footer-chat">
-    <input type="text" id="chatIn" placeholder="Broadcast intelligence...">
-    <button onclick="send()">SEND</button>
-</div>
-
-<script>
-    function initializeTerminal() {
-        document.getElementById('gatekeeper').style.display = 'none';
-        // Mini widgets load automatically via TradingView embed‑script.
-    }
-
-    function openNews(tag, title, desc) {
-        const reader = document.getElementById('reader');
-        const content = document.getElementById('reader-content');
-
-        content.innerHTML = `
-            <div class="reader-header">Internal Research: ${tag}</div>
-            <h1 class="reader-title">${title}</h1>
-            <p class="reader-body">${desc}</p>
-        `;
-
-        reader.style.display = 'block';
-    }
-
-    function closeNews() {
-        document.getElementById('reader').style.display = 'none';
-    }
-
-    function send() {
-        const input = document.getElementById('chatIn');
-        const value = input.value.trim();
-
-        if (!value) return;
-
-        const logs = document.getElementById('chat-logs');
-        const div = document.createElement('div');
-        div.className = 'msg';
-        div.innerHTML = `<b>[USER]</b> ${value}`;
-        logs.appendChild(div);
-
-        input.value = '';
-        input.focus();
-        logs.scrollTop = logs.scrollHeight;
-    }
-
-    document.getElementById('chatIn').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            send();
+    const APP = {
+      tickerItems: [
+        "DAILY INTELLIGENCE SYNC ONLINE",
+        "HARD-ASSET MOMENTUM WATCH",
+        "MACRO LIQUIDITY NODES ACTIVE",
+        "CROSS-ASSET FLOW MONITORING",
+        "REAL-TIME FEED EXPLAINERS ENABLED"
+      ],
+      widgets: [
+        { title: "Gold (XAUUSD)", symbol: "OANDA:XAUUSD" },
+        { title: "Silver (XAGUSD)", symbol: "OANDA:XAGUSD" },
+        { title: "Bitcoin (BTC)", symbol: "BITSTAMP:BTCUSD" }
+      ],
+      logs: [
+        { type: "system", label: "SYSTEM", text: "Terminal authorized. Daily live news mode is armed." },
+        { type: "system", label: "SYNC", text: "Feed cache will refresh automatically when the day changes." },
+        { type: "alert", label: "ALERT", text: "Manual refresh available for immediate headline updates." }
+      ],
+      fallbackArticles: [
+        {
+          title: "Live feed temporarily unavailable",
+          link: "#",
+          source: "Terminal Fallback",
+          pubDate: new Date().toISOString(),
+          image: "",
+          summary: "The app is showing fallback mode because the external feed could not be reached right now.",
+          why: "Why it matters: your UI still stays functional, and once the feed is available again the terminal can refresh into live mode automatically.",
+          tag: "SYSTEM"
         }
-    });
-</script>
+      ],
+      currentArticles: []
+    };
 
+    const els = {
+      gatekeeper: document.getElementById("gatekeeper"),
+      initBtn: document.getElementById("initBtn"),
+      tickerTrack: document.getElementById("tickerTrack"),
+      widgetGrid: document.getElementById("widgetGrid"),
+      featuredStory: document.getElementById("featuredStory"),
+      dailyStatus: document.getElementById("dailyStatus"),
+      lastUpdatedText: document.getElementById("lastUpdatedText"),
+      newsGrid: document.getElementById("newsGrid"),
+      newsCount: document.getElementById("newsCount"),
+      feedStatus: document.getElementById("feedStatus"),
+      refreshNewsBtn: document.getElementById("refreshNewsBtn"),
+      chatLogs: document.getElementById("chatLogs"),
+      chatInput: document.getElementById("chatInput"),
+      sendBtn: document.getElementById("sendBtn"),
+      reader: document.getElementById("reader"),
+      readerContent: document.getElementById("readerContent"),
+      closeReaderBtn: document.getElementById("closeReaderBtn")
+    };
+
+    function todayKey() {
+      const now = new Date();
+      return [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return "Unknown date";
+      return d.toLocaleString([], {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function relativeTime(dateStr) {
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return "Unknown";
+      const diffMs = Date.now() - d.getTime();
+      const diffMin = Math.floor(diffMs / 60000);
+      if (diffMin < 1) return "just now";
+      if (diffMin < 60) return `${diffMin}m ago`;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return `${diffHr}h ago`;
+      const diffDay = Math.floor(diffHr / 24);
+      return `${diffDay}d ago`;
+    }
+
+    function stripHTML(input = "") {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = input;
+      return (tmp.textContent || tmp.innerText || "").replace(/\s+/g, " ").trim();
+    }
+
+    function clipText(text = "", max = 180) {
+      const clean = text.trim();
+      if (clean.length <= max) return clean;
+      return clean.slice(0, max).trim() + "…";
+    }
+
+    function extractImage(item) {
+      if (item.thumbnail) return item.thumbnail;
+
+      if (item.enclosure && item.enclosure.link) {
+        return item.enclosure.link;
+      }
+
+      const candidates = [
+        item.description || "",
+        item.content || "",
+        item.content_encoded || ""
+      ];
+
+      for (const html of candidates) {
+        if (!html) continue;
+        const tmp = document.createElement("div");
+        tmp.innerHTML = html;
+        const img = tmp.querySelector("img");
+        if (img && img.src) return img.src;
+      }
+
+      return "";
+    }
+
+    function detectTag(article) {
+      const text = `${article.title} ${article.summary}`.toLowerCase();
+      if (/(gold|silver|platinum|commodity|commodities|metals)/.test(text)) return "METALS";
+      if (/(bitcoin|btc|crypto|ethereum|etf)/.test(text)) return "CRYPTO";
+      if (/(fed|inflation|rates|yield|treasury|macro|economy|dollar)/.test(text)) return "MACRO";
+      return "MARKETS";
+    }
+
+    function buildWhyItMatters(article) {
+      const text = `${article.title} ${article.summary}`.toLowerCase();
+
+      if (/(gold|silver|commodity|commodities|metals)/.test(text)) {
+        return "Why it matters: moves in metals often signal changes in inflation expectations, risk appetite, and safe-haven demand across global markets.";
+      }
+
+      if (/(bitcoin|btc|crypto|ethereum|etf)/.test(text)) {
+        return "Why it matters: crypto headlines can quickly affect institutional flows, ETF sentiment, and broader risk-on versus risk-off positioning.";
+      }
+
+      if (/(fed|rates|inflation|yield|treasury|central bank|dollar)/.test(text)) {
+        return "Why it matters: policy and macro data can reset expectations for liquidity, yields, and valuation across stocks, metals, and crypto.";
+      }
+
+      if (/(stocks|equities|market|wall street|shares)/.test(text)) {
+        return "Why it matters: broad market headlines help explain shifts in sentiment, sector rotation, and how investors are pricing risk.";
+      }
+
+      return "Why it matters: this story may influence market sentiment, cross-asset positioning, or the next wave of trader attention.";
+    }
+
+    function articleIsRelevant(item) {
+      const text = `${item.title} ${item.summary}`.toLowerCase();
+      return /(gold|silver|bitcoin|btc|crypto|inflation|fed|rates|market|markets|stocks|equities|commodities|commodity|macro|treasury|yield|etf|dollar|economy)/.test(text);
+    }
+
+    function normalizeArticle(raw, sourceName = "Live Feed") {
+      const title = stripHTML(raw.title || "");
+      const desc = stripHTML(raw.description || raw.content || "");
+      const summary = clipText(desc || "Open the article to see the full context and read the explanation.");
+      const image = extractImage(raw);
+
+      const article = {
+        title,
+        link: raw.link || "#",
+        source: raw.author || raw.source || sourceName,
+        pubDate: raw.pubDate || new Date().toISOString(),
+        image,
+        summary,
+        tag: "MARKETS"
+      };
+
+      article.tag = detectTag(article);
+      article.why = buildWhyItMatters(article);
+
+      return article;
+    }
+
+    function dedupeArticles(list) {
+      const seen = new Set();
+      return list.filter((item) => {
+        const key = `${item.title}__${item.link}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function sortArticlesByDate(list) {
+      return [...list].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+    }
+
+    async function fetchFeed(feedUrl) {
+      const url = CONFIG.rssBridge + encodeURIComponent(feedUrl);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Feed request failed");
+      const data = await res.json();
+      if (data.status !== "ok" || !Array.isArray(data.items)) {
+        throw new Error("Invalid feed payload");
+      }
+      return data.items.map((item) => normalizeArticle(item, data.feed?.title || "Live Feed"));
+    }
+
+    async function fetchLatestNews(force = false) {
+      const day = todayKey();
+      const cachedDay = localStorage.getItem(CONFIG.cacheDayKey);
+      const cachedRaw = localStorage.getItem(CONFIG.cacheKey);
+
+      els.dailyStatus.textContent = force ? "Refreshing" : "Checking";
+      els.feedStatus.textContent = "Syncing latest headlines...";
+
+      if (!force && cachedDay === day && cachedRaw) {
+        try {
+          const cachedArticles = JSON.parse(cachedRaw);
+          if (Array.isArray(cachedArticles) && cachedArticles.length) {
+            APP.currentArticles = cachedArticles;
+            renderNews(cachedArticles);
+            updateRefreshMeta(localStorage.getItem(CONFIG.cacheTimeKey), true);
+            addLog("SYSTEM", "Daily cache loaded successfully.", "success");
+            els.dailyStatus.textContent = "Cached";
+            return;
+          }
+        } catch (err) {}
+      }
+
+      try {
+        const results = await Promise.allSettled(CONFIG.feeds.map(fetchFeed));
+
+        let allArticles = [];
+        for (const result of results) {
+          if (result.status === "fulfilled") {
+            allArticles = allArticles.concat(result.value);
+          }
+        }
+
+        allArticles = dedupeArticles(allArticles)
+          .filter(articleIsRelevant)
+          .slice(0, 40);
+
+        allArticles = sortArticlesByDate(allArticles).slice(0, CONFIG.maxStories);
+
+        if (!allArticles.length) {
+          throw new Error("No relevant articles found");
+        }
+
+        APP.currentArticles = allArticles;
+        localStorage.setItem(CONFIG.cacheKey, JSON.stringify(allArticles));
+        localStorage.setItem(CONFIG.cacheDayKey, day);
+        localStorage.setItem(CONFIG.cacheTimeKey, new Date().toISOString());
+
+        renderNews(allArticles);
+        updateRefreshMeta(new Date().toISOString(), false);
+        addLog("SYNC", "Fresh headlines pulled into terminal.", "success");
+        els.dailyStatus.textContent = "Live";
+      } catch (err) {
+        const fallback = cachedRaw ? JSON.parse(cachedRaw) : APP.fallbackArticles;
+        APP.currentArticles = fallback;
+        renderNews(fallback);
+        updateRefreshMeta(localStorage.getItem(CONFIG.cacheTimeKey) || new Date().toISOString(), true);
+        addLog("ALERT", "Feed refresh failed, fallback mode enabled.", "alert");
+        els.dailyStatus.textContent = "Fallback";
+      }
+    }
+
+    function updateRefreshMeta(time, fromCache = false) {
+      els.lastUpdatedText.textContent = time ? formatDate(time) : "—";
+      els.feedStatus.textContent = fromCache
+        ? "Loaded from today’s cache. Tap refresh to force an update."
+        : "Fresh live feed synchronized.";
+    }
+
+    function renderTicker() {
+      els.tickerTrack.textContent = APP.tickerItems.join("  |  ");
+    }
+
+    function renderWidgets() {
+      els.widgetGrid.innerHTML = "";
+      APP.widgets.forEach((widget) => {
+        const card = document.createElement("article");
+        card.className = "widget-card glass";
+
+        const head = document.createElement("div");
+        head.className = "widget-head";
+
+        const title = document.createElement("h3");
+        title.textContent = widget.title;
+
+        const symbol = document.createElement("span");
+        symbol.textContent = widget.symbol;
+
+        head.append(title, symbol);
+
+        const body = document.createElement("div");
+        body.className = "widget-body";
+
+        const shell = document.createElement("div");
+        shell.className = "tradingview-widget-container tv-shell";
+
+        const inner = document.createElement("div");
+        inner.className = "tradingview-widget-container__widget";
+
+        const script = document.createElement("script");
+        script.src =
+          "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
+        script.async = true;
+        script.innerHTML = JSON.stringify({
+          symbol: widget.symbol,
+          width: "100%",
+          height: "100%",
+          locale: "en",
+          dateRange: "1M",
+          colorTheme: "dark",
+          trendLineColor: "rgba(230, 145, 56, 1)",
+          underLineColor: "rgba(251, 191, 36, 0.22)",
+          isTransparent: true,
+          autosize: true,
+          noTimeScale: true
+        });
+
+        shell.append(inner, script);
+        body.appendChild(shell);
+        card.append(head, body);
+        els.widgetGrid.appendChild(card);
+      });
+    }
+
+    function buildFeatured(article) {
+      els.featuredStory.innerHTML = "";
+
+      const visual = document.createElement("div");
+      visual.className = "hero-image";
+
+      if (article.image) {
+        const img = document.createElement("img");
+        img.src = article.image;
+        img.alt = article.title;
+        img.loading = "lazy";
+        visual.appendChild(img);
+      } else {
+        const fallback = document.createElement("div");
+        fallback.className = "hero-fallback";
+        visual.appendChild(fallback);
+      }
+
+      const content = document.createElement("div");
+      content.className = "hero-content";
+
+      const badge = document.createElement("span");
+      badge.className = "hero-badge";
+      badge.textContent = `${article.tag} • Featured`;
+
+      const title = document.createElement("h1");
+      title.className = "hero-title";
+      title.textContent = article.title;
+
+      const desc = document.createElement("p");
+      desc.className = "hero-desc";
+      desc.textContent = article.summary;
+
+      const meta = document.createElement("div");
+      meta.className = "hero-meta";
+      meta.innerHTML = `
+        <span>Source: ${article.source}</span>
+        <span>${formatDate(article.pubDate)}</span>
+        <span>${relativeTime(article.pubDate)}</span>
+      `;
+
+      const actions = document.createElement("div");
+      actions.className = "hero-actions";
+
+      const readBtn = document.createElement("button");
+      readBtn.className = "btn btn-gold";
+      readBtn.type = "button";
+      readBtn.textContent = "OPEN STORY";
+      readBtn.addEventListener("click", () => openReader(article));
+
+      const visitLink = document.createElement("a");
+      visitLink.href = article.link || "#";
+      visitLink.target = "_blank";
+      visitLink.rel = "noopener noreferrer";
+      visitLink.className = "btn btn-dark";
+      visitLink.style.textDecoration = "none";
+      visitLink.textContent = "VISIT SOURCE";
+
+      actions.append(readBtn, visitLink);
+      content.append(badge, title, desc, meta, actions);
+      els.featuredStory.append(visual, content);
+    }
+
+    function createNewsCard(article) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "news-card glass";
+
+      const thumb = document.createElement("div");
+      thumb.className = "news-thumb";
+
+      if (article.image) {
+        const img = document.createElement("img");
+        img.src = article.image;
+        img.alt = article.title;
+        img.loading = "lazy";
+        thumb.appendChild(img);
+      }
+
+      const badge = document.createElement("div");
+      badge.className = "news-thumb-badge";
+      badge.textContent = article.tag;
+      thumb.appendChild(badge);
+
+      const body = document.createElement("div");
+      body.className = "news-body";
+
+      const topline = document.createElement("div");
+      topline.className = "news-topline";
+      topline.innerHTML = `
+        <span class="source-chip">${article.source}</span>
+        <span>${relativeTime(article.pubDate)}</span>
+      `;
+
+      const title = document.createElement("h3");
+      title.className = "news-title";
+      title.textContent = article.title;
+
+      const summary = document.createElement("p");
+      summary.className = "news-summary";
+      summary.textContent = article.summary;
+
+      const why = document.createElement("p");
+      why.className = "news-why";
+      why.innerHTML = `<strong>Why it matters:</strong> ${article.why.replace(/^Why it matters:\s*/i, "")}`;
+
+      const linkText = document.createElement("div");
+      linkText.className = "news-link";
+      linkText.textContent = "Tap to read explanation →";
+
+      body.append(topline, title, summary, why, linkText);
+      card.append(thumb, body);
+
+      card.addEventListener("click", () => openReader(article));
+      return card;
+    }
+
+    function renderNews(list) {
+      els.newsGrid.innerHTML = "";
+      els.newsCount.textContent = String(list.length);
+
+      if (!list.length) {
+        const box = document.createElement("div");
+        box.className = "glass state-box";
+        box.textContent = "No stories found right now.";
+        els.newsGrid.appendChild(box);
+        return;
+      }
+
+      buildFeatured(list[0]);
+      list.forEach((article) => {
+        els.newsGrid.appendChild(createNewsCard(article));
+      });
+    }
+
+    function openReader(article) {
+      els.readerContent.innerHTML = "";
+
+      const wrap = document.createElement("div");
+
+      const cover = document.createElement("div");
+      cover.className = "reader-cover";
+
+      if (article.image) {
+        const img = document.createElement("img");
+        img.src = article.image;
+        img.alt = article.title;
+        img.loading = "lazy";
+        cover.appendChild(img);
+      }
+
+      const body = document.createElement("div");
+      body.className = "reader-body";
+
+      const topline = document.createElement("div");
+      topline.className = "reader-topline";
+      topline.innerHTML = `
+        <span class="source-chip">${article.source}</span>
+        <span>${formatDate(article.pubDate)}</span>
+        <span>${article.tag}</span>
+      `;
+
+      const title = document.createElement("h1");
+      title.className = "reader-title";
+      title.textContent = article.title;
+
+      const summary = document.createElement("p");
+      summary.className = "reader-text";
+      summary.textContent = article.summary;
+
+      const why = document.createElement("p");
+      why.className = "reader-explainer";
+      why.innerHTML = `<strong>${article.why}</strong>`;
+
+      const note = document.createElement("p");
+      note.className = "reader-text";
+      note.textContent =
+        "This terminal view gives you a fast explanation for why the story matters. Use the source button below to open the original article for full reporting and context.";
+
+      const actions = document.createElement("div");
+      actions.className = "reader-actions";
+
+      const sourceBtn = document.createElement("a");
+      sourceBtn.href = article.link || "#";
+      sourceBtn.target = "_blank";
+      sourceBtn.rel = "noopener noreferrer";
+      sourceBtn.className = "btn btn-gold";
+      sourceBtn.textContent = "OPEN ORIGINAL SOURCE";
+
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "btn btn-dark";
+      closeBtn.type = "button";
+      closeBtn.textContent = "CLOSE";
+      closeBtn.addEventListener("click", closeReader);
+
+      actions.append(sourceBtn, closeBtn);
+      body.append(topline, title, summary, why, note, actions);
+      wrap.append(cover, body);
+      els.readerContent.appendChild(wrap);
+
+      els.reader.hidden = false;
+      document.body.classList.add("reader-open");
+    }
+
+    function closeReader() {
+      els.reader.hidden = true;
+      document.body.classList.remove("reader-open");
+    }
+
+    function addLog(label, text, type = "system") {
+      const row = document.createElement("div");
+      row.className = `msg ${type}`;
+
+      const labelEl = document.createElement("span");
+      labelEl.className = "msg-label";
+      labelEl.textContent = `[${label}]`;
+
+      const textEl = document.createElement("span");
+      textEl.textContent = ` ${text}`;
+
+      row.append(labelEl, textEl);
+      els.chatLogs.appendChild(row);
+      els.chatLogs.scrollTop = els.chatLogs.scrollHeight;
+    }
+
+    function renderLogs() {
+      els.chatLogs.innerHTML = "";
+      APP.logs.forEach((item) => addLog(item.label, item.text, item.type));
+    }
+
+    function handleSend() {
+      const value = els.chatInput.value.trim();
+      if (!value) return;
+
+      addLog("USER", value, "user");
+      els.chatInput.value = "";
+      els.chatInput.focus();
+
+      const replies = [
+        "Signal received and indexed.",
+        "Local note appended to terminal stream.",
+        "Broadcast logged for session context.",
+        "Research note captured."
+      ];
+
+      setTimeout(() => {
+        addLog("SYSTEM", replies[Math.floor(Math.random() * replies.length)], "system");
+      }, 300);
+    }
+
+    function initGate() {
+      els.gatekeeper.classList.add("is-hidden");
+    }
+
+    function bindEvents() {
+      els.initBtn.addEventListener("click", initGate);
+      els.sendBtn.addEventListener("click", handleSend);
+      els.chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") handleSend();
+      });
+
+      els.refreshNewsBtn.addEventListener("click", async () => {
+        addLog("SYNC", "Manual refresh triggered.", "system");
+        await fetchLatestNews(true);
+      });
+
+      els.closeReaderBtn.addEventListener("click", closeReader);
+      els.reader.addEventListener("click", (e) => {
+        if (e.target === els.reader) closeReader();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !els.reader.hidden) {
+          closeReader();
+        }
+      });
+    }
+
+    function startDailyCheckLoop() {
+      setInterval(() => {
+        const currentDay = todayKey();
+        const savedDay = localStorage.getItem(CONFIG.cacheDayKey);
+        if (savedDay !== currentDay) {
+          addLog("SYNC", "New day detected. Refreshing live headlines.", "success");
+          fetchLatestNews(true);
+        }
+      }, CONFIG.checkIntervalMs);
+    }
+
+    async function init() {
+      renderTicker();
+      renderWidgets();
+      renderLogs();
+      bindEvents();
+      await fetchLatestNews(false);
+      startDailyCheckLoop();
+    }
+
+    init();
+  </script>
 </body>
 </html>
